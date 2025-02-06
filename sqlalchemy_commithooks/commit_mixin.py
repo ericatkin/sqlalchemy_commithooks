@@ -4,7 +4,7 @@ from contextlib import contextmanager
 
 from sqlalchemy import event
 from sqlalchemy.orm import object_session
-from sqlalchemy.orm.session import SessionTransaction
+from sqlalchemy.orm.session import SessionTransaction, SessionTransactionOrigin
 
 
 def _build_add_func(time, action):
@@ -245,6 +245,6 @@ def _tmp_transaction(session: SessionMixin):
     Fix it by providing a temporary transaction.
     """
     current_transaction = session.transaction
-    session.transaction = SessionTransaction(session)
+    session.transaction = SessionTransaction(session, SessionTransactionOrigin.BEGIN)
     yield session
     session.transaction = current_transaction

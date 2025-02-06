@@ -381,7 +381,7 @@ class TestCommitMixinHooks:
 
         data1 = self.Data()
         session.add(data1)
-        with pytest.raises(AttributeError):
+        with pytest.raises(NotImplementedError):
             monkeypatch.delattr('sqlalchemy.engine.base.Transaction.commit')
             session.commit()
         monkeypatch.undo()
@@ -390,7 +390,7 @@ class TestCommitMixinHooks:
 
         data2 = self.Data()
         session.add(data2)
-        with pytest.raises(AttributeError):
+        with pytest.raises(NotImplementedError):
             monkeypatch.delattr('sqlalchemy.engine.base.Transaction.commit')
             session.commit()
         monkeypatch.undo()
