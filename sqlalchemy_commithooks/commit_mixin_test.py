@@ -4,8 +4,7 @@ import pytest
 from mock import Mock
 from sqlalchemy import Column, Integer
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from . import commit_mixin
 from .commit_mixin import _build_add_func, Session
@@ -100,7 +99,6 @@ class TestHookLookup:
         assert len(self.Multiple._overridden_hooks()) == 2
         assert 'before_commit_from_update' in self.Multiple._overridden_hooks()
         assert 'before_commit_from_delete' in self.Multiple._overridden_hooks()
-
 
 
 @contextmanager
@@ -213,9 +211,9 @@ def test_end_to_end():
     assert data.after_commit_counter == 1
 
 
-Base = declarative_base()
-
 class TestQueriesAtCommit:
+    Base = declarative_base()
+
     class Foo(Base):
         __tablename__ = "foo"
         id = Column(Integer, primary_key=True)
@@ -258,9 +256,13 @@ class TestQueriesAtCommit:
 
 class TestCommitMixinHooks:
     """verify correct behavior with the hooks we have selected"""
+    
+    Base = declarative_base()
+
     class Data(Base, commit_mixin.CommitMixin):
         __tablename__ = "data"
         id = Column(Integer, primary_key=True)
+        value = Column(Integer, unique=True)
 
         def __init__(self, *args, **kwargs):
             self.before_commit_counter = 0
@@ -322,12 +324,12 @@ class TestCommitMixinHooks:
 
     def test_nested_bad_flush(self):
         session = self.get_session()
-        outer_data = self.Data(id=1)
+        outer_data = self.Data(value=1)
         session.add(outer_data)
 
         session.begin_nested()
         with pytest.raises(Exception):
-            bad_flush_data = self.Data(id=1)
+            bad_flush_data = self.Data(value=1)
             session.add(bad_flush_data)
             session.commit()
         # except
